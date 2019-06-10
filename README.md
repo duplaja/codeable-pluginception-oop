@@ -11,9 +11,9 @@ OOP Version of Pluginception modified to spin up quick, plugins for use with cli
 
 ## Directions
 * Download oop-pluginception.php
-* Modify the PHP constants on lines 36-42 as desired
+* Modify the PHP constants on lines 36-39 as desired
 * Upload modified file to (create if needed) yourdevsite/wp-content/mu-plugins/
-* Under the Admin > Plugins submenu, pick "Create OOP Plugin"
+* Under the Admin > Plugins submenu, pick "Create Plugin - OOP"
 * Follow on-screen prompts
 
 ## Thanks
