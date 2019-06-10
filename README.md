@@ -10,9 +10,9 @@ OOP Version of Pluginception modified to spin up quick, plugins for use with cli
 * Checks if functions exist before declaring them
 
 ## Directions
-* Download oop-pluginception.php
+* Download this repo as a zip (or clone)
 * Modify the PHP constants on lines 36-39 as desired
-* Upload modified file to (create if needed) yourdevsite/wp-content/mu-plugins/
+* Upload modified zip (create if needed) and activate it
 * Under the Admin > Plugins submenu, pick "Create Plugin - OOP"
 * Follow on-screen prompts
 
