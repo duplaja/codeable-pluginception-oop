@@ -33,10 +33,10 @@ License URI: http://www.gnu.org/licenses/gpl-2.0.html
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
-define("AUTHOR_NAME", "Dan Dulaney");
-define("AUTHOR_EMAIL", "dan.dulaney07@gmail.com");
-define("AUTHOR_SITE", "https://dandulaney.com");
-define("PLUGIN_SITE", "https://codeable.io/developers/dan-dulaney/");
+define("AUTHOR_NAME", "Your Name");
+define("AUTHOR_EMAIL", "Your E-Mail");
+define("AUTHOR_SITE", "https://example.com");
+define("PLUGIN_SITE", "https://example.com");
 
 
 add_action('admin_menu', 'pluginception_oop_admin_add_page');
@@ -244,7 +244,8 @@ function pluginception_oop_create_plugin() {
 			'text_domain'=>"{$_POST['pluginception_oop_text_domain']}",
 			'current_year'=>"$curyear",
 			'Class_Name'=>"{$_POST['pluginception_oop_class_name']}",
-			'SHORT'=>"{$_POST['pluginception_oop_short_name']}"
+			'SHORT'=>"{$_POST['pluginception_oop_short_name']}",
+			'plugin_prefix'=> str_replace('-','_',"{$_POST['pluginception_oop_slug']}")
 		);
 
 		foreach($to_replace as $key => $value) {
@@ -292,7 +293,7 @@ END;
 	if ('both' == $_POST['pluginception_oop_subdirs'] || 'js' == $_POST['pluginception_oop_subdirs']) {
 
 		$main_plugin_file = str_replace("//add_action( 'wp_enqueue_scripts'","add_action( 'wp_enqueue_scripts'",$main_plugin_file);
-		$main_plugin_file = str_replace("//wp_enqueue_script","wp_enqueue_style",$main_plugin_file);
+		$main_plugin_file = str_replace("//wp_enqueue_script","wp_enqueue_script",$main_plugin_file);
 
 		if ( ! $wp_filesystem->put_contents( $jsfile, $js_file_header, FS_CHMOD_FILE) ) {
 			add_settings_error( 'pluginception_oop', 'create_file', 'Unable to create the plugin blank index file.', 'error' );
