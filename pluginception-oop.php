@@ -7,7 +7,7 @@ Version: 1.0
 Author: Dan Dulaney (forked from a plugin by Otto)
 Author URI: https://dandulaney.com
 Text Domain: pluginception_oop
-License: GPLv2 only
+License: GPLv2
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 
@@ -39,8 +39,8 @@ define("AUTHOR_SITE", "https://dandulaney.com");
 define("PLUGIN_SITE", "https://codeable.io/developers/dan-dulaney/");
 
 
-add_action('admin_menu', 'pluginception_codeable_admin_add_page');
-function pluginception_codeable_admin_add_page() {
+add_action('admin_menu', 'pluginception_oop_admin_add_page');
+function pluginception_oop_admin_add_page() {
 	add_plugins_page(
 		'Create Plugin - OOP',
 		'Create Plugin - OOP',
@@ -97,7 +97,7 @@ function pluginception_oop_options_page() {
 			}
 			
 			
-			echo "<tr valign='top'><th scope='row'>{$title}</th><td><input class='regular-text' type='text' name='" . esc_attr("pluginception_codeable_{$slug}") . "' value='{$value}'></td></tr>\n";
+			echo "<tr valign='top'><th scope='row'>{$title}</th><td><input class='regular-text' type='text' name='" . esc_attr("pluginception_oop_{$slug}") . "' value='{$value}'></td></tr>\n";
 		}
 
 		echo "<tr valign='top'><th scope='row'>Add CSS / JS?</th><td><select class='regular-text' name='pluginception_oop_subdirs'>
@@ -140,6 +140,29 @@ function pluginception_oop_create_plugin() {
 		$_POST['pluginception_oop_class_name'] = str_replace(' ','_',preg_replace('/[^a-z\d ]/i', '', $_POST['pluginception_oop_class_name']));	
 	}
 
+	if( empty($_POST['pluginception_oop_short_name'])) {
+
+		$words = explode(" ","{$_POST['pluginception_oop_name']}");
+		$acronym = "";
+
+		if(count($words) > 2) {
+			foreach ($words as $w) {
+			  	$acronym .= $w[0];
+			}
+		}
+		else {
+
+			$acronym .= substr(str_replace(' ','',$_POST['pluginception_oop_name']), 0, 4);
+		}
+
+		$acronym =strtoupper($acronym);
+
+		$_POST['pluginception_oop_short_name'] = $acronym;
+
+	} else {
+		$_POST['pluginception_oop_short_name'] = strtoupper(str_replace(' ','_',preg_replace('/[^a-z\d ]/i', '', $_POST['pluginception_oop_short_name'])));
+	}
+
 	if ( file_exists(trailingslashit(WP_PLUGIN_DIR).$_POST['pluginception_oop_slug'] ) ) {
 		add_settings_error( 'pluginception_oop', 'existing_plugin', 'That plugin appears to already exist. Use a different slug or name.', 'error' );
 		return $_POST;
@@ -151,7 +174,7 @@ function pluginception_oop_create_plugin() {
 	$method = ''; // TODO TESTING
 
 	// okay, let's see about getting credentials
-	$url = wp_nonce_url('plugins.php?page=pluginception_codeable','pluginception_codeable_nonce');
+	$url = wp_nonce_url('plugins.php?page=pluginception_oop','pluginception_oop_nonce');
 	if (false === ($creds = request_filesystem_credentials($url, $method, false, false, $form_fields) ) ) {
 		return true;
 	}
@@ -201,32 +224,38 @@ function pluginception_oop_create_plugin() {
 	$blankjsindex = trailingslashit($plugdir).'/js/index.php';
 	$blankcssindex = trailingslashit($plugdir).'/css/index.php';
 
-/*
+	$template_file = plugin_dir_url( __FILE__ ).'wordpress-plugin-oop-boilerplate.php.template';
 
-	$header = <<<END
-<?php
-/*
-Plugin Name: {$_POST['pluginception_codeable_name']}
-Plugin URI: {$_POST['pluginception_codeable_uri']}
-Description: {$_POST['pluginception_codeable_description']}
-Version: {$_POST['pluginception_codeable_version']}
-Author: {$_POST['pluginception_codeable_author']}
-Author URI: {$_POST['pluginception_codeable_author_uri']}
-License: {$_POST['pluginception_codeable_license']}
-License URI: {$_POST['pluginception_codeable_license_uri']}
-*/
+	$main_plugin_file = file_get_contents($template_file);
 
-if ('both' == $_POST['pluginception_oop_subdirs'] || 'css' == $_POST['pluginception_oop_subdirs']) {
+	if(!$main_plugin_file) {
+		add_settings_error( 'pluginception_oop', 'create_file', 'Unable to open template file.', 'error' );
+		return $_POST;
+	} else {
 
-	
-} 
-if ('both' == $_POST['pluginception_oop_subdirs'] || 'js' == $_POST['pluginception_oop_subdirs']) {
+		$to_replace = array(
+			'plugin_name'=>"{$_POST['pluginception_oop_name']}",
+			'plugin_uri'=>"{$_POST['pluginception_oop_uri']}",
+			'plugin_desc'=>"{$_POST['pluginception_oop_description']}",
+			'plugin_slug'=>"{$_POST['pluginception_oop_slug']}",
+			'author_name'=>"{$_POST['pluginception_oop_author']}",
+			'author_uri'=>"{$_POST['pluginception_oop_author_uri']}",
+			'author_email'=>"{$_POST['pluginception_oop_author_email']}",
+			'text_domain'=>"{$_POST['pluginception_oop_text_domain']}",
+			'current_year'=>"$curyear",
+			'Class_Name'=>"{$_POST['pluginception_oop_class_name']}",
+			'SHORT'=>"{$_POST['pluginception_oop_short_name']}"
+		);
 
+		foreach($to_replace as $key => $value) {
 
-}
+			$main_plugin_file = str_replace("$key","$value",$main_plugin_file);
+		}
 
+		
+	}
 
-
+//Header templates for blank files if needed
 $index_header = <<<END
 <?php
 if ( ! defined( 'ABSPATH' ) ) { 
@@ -243,16 +272,11 @@ $js_file_header = <<<END
 END;
 
 
+	//Handles CSS Files
+	if ('both' == $_POST['pluginception_oop_subdirs'] || 'css' == $_POST['pluginception_oop_subdirs']) {
 
-	if ( ! $wp_filesystem->put_contents( $plugfile, $header, FS_CHMOD_FILE) ) {
-		add_settings_error( 'pluginception_oop', 'create_file', 'Unable to create the plugin file.', 'error' );
-	}
-
-	if ( ! $wp_filesystem->put_contents( $blankplugfile, $index_header, FS_CHMOD_FILE) ) {
-		add_settings_error( 'pluginception_oop', 'create_file', 'Unable to create the plugin blank index file.', 'error' );
-	}
-
-	if('both' == $_POST['pluginception_oop_subdirs'] || 'css' == $_POST['pluginception_oop_subdirs']) {
+		$main_plugin_file = str_replace("//add_action( 'wp_enqueue_scripts'","add_action( 'wp_enqueue_scripts'",$main_plugin_file);
+		$main_plugin_file = str_replace("//wp_enqueue_style","wp_enqueue_style",$main_plugin_file);
 
 		if ( ! $wp_filesystem->put_contents( $cssfile, $css_file_header, FS_CHMOD_FILE) ) {
 			add_settings_error( 'pluginception_oop', 'create_file', 'Unable to create the plugin blank index file.', 'error' );
@@ -262,8 +286,13 @@ END;
 			add_settings_error( 'pluginception_oop', 'create_file', 'Unable to create the plugin blank index file in css subfolder.', 'error' );
 		}
 
-	}
-	if('both' == $_POST['pluginception_oop_subdirs'] || 'js' == $_POST['pluginception_oop_subdirs']) {
+	} 
+
+	//Handle JS Files
+	if ('both' == $_POST['pluginception_oop_subdirs'] || 'js' == $_POST['pluginception_oop_subdirs']) {
+
+		$main_plugin_file = str_replace("//add_action( 'wp_enqueue_scripts'","add_action( 'wp_enqueue_scripts'",$main_plugin_file);
+		$main_plugin_file = str_replace("//wp_enqueue_script","wp_enqueue_style",$main_plugin_file);
 
 		if ( ! $wp_filesystem->put_contents( $jsfile, $js_file_header, FS_CHMOD_FILE) ) {
 			add_settings_error( 'pluginception_oop', 'create_file', 'Unable to create the plugin blank index file.', 'error' );
@@ -271,6 +300,16 @@ END;
 		if ( ! $wp_filesystem->put_contents( $blankjsindex, $index_header, FS_CHMOD_FILE) ) {
 			add_settings_error( 'pluginception_oop', 'create_file', 'Unable to create the plugin blank index file in js subfolder.', 'error' );
 		}
+	}
+
+	//Handles Main Plugin File
+	if ( ! $wp_filesystem->put_contents( $plugfile, $main_plugin_file, FS_CHMOD_FILE) ) {
+		add_settings_error( 'pluginception_oop', 'create_file', 'Unable to create the plugin file.', 'error' );
+	}
+
+	//Handles a blank index
+	if ( ! $wp_filesystem->put_contents( $blankplugfile, $index_header, FS_CHMOD_FILE) ) {
+		add_settings_error( 'pluginception_oop', 'create_file', 'Unable to create the plugin blank index file.', 'error' );
 	}
 
 	$plugslug = $_POST['pluginception_oop_slug'].'/'.$_POST['pluginception_oop_slug'].'.php';
