@@ -224,7 +224,7 @@ function pluginception_oop_create_plugin() {
 	$blankjsindex = trailingslashit($plugdir).'/js/index.php';
 	$blankcssindex = trailingslashit($plugdir).'/css/index.php';
 
-	$template_file = plugin_dir_url( __FILE__ ).'wordpress-plugin-oop-boilerplate.php.template';
+	$template_file = plugin_dir_url( __FILE__ ).'wordpress-plugin-oop-boilerplate.template';
 
 	$main_plugin_file = file_get_contents($template_file);
 
@@ -276,8 +276,11 @@ END;
 	//Handles CSS Files
 	if ('both' == $_POST['pluginception_oop_subdirs'] || 'css' == $_POST['pluginception_oop_subdirs']) {
 
-		$main_plugin_file = str_replace("//add_action( 'wp_enqueue_scripts'","add_action( 'wp_enqueue_scripts'",$main_plugin_file);
+		$main_plugin_file = str_replace('//$this->load_assets();','$this->load_assets();',$main_plugin_file);
 		$main_plugin_file = str_replace("//wp_enqueue_style","wp_enqueue_style",$main_plugin_file);
+		$main_plugin_file = str_replace("//add_action('wp_enqueue_scripts','{$_POST['pluginception_oop_short_name']}');","add_action('wp_enqueue_scripts','{$_POST['pluginception_oop_short_name']}');",$main_plugin_file);
+		$main_plugin_file = str_replace("//Comment out if class loads scripts / styles)",'',$main_plugin_file);
+		$main_plugin_file = str_replace("add_action('init','{$_POST['pluginception_oop_short_name']}');",'',$main_plugin_file);
 
 		if ( ! $wp_filesystem->put_contents( $cssfile, $css_file_header, FS_CHMOD_FILE) ) {
 			add_settings_error( 'pluginception_oop', 'create_file', 'Unable to create the plugin blank index file.', 'error' );
@@ -292,8 +295,12 @@ END;
 	//Handle JS Files
 	if ('both' == $_POST['pluginception_oop_subdirs'] || 'js' == $_POST['pluginception_oop_subdirs']) {
 
-		$main_plugin_file = str_replace("//add_action( 'wp_enqueue_scripts'","add_action( 'wp_enqueue_scripts'",$main_plugin_file);
+		$main_plugin_file = str_replace('//$this->load_assets();','$this->load_assets();',$main_plugin_file);
 		$main_plugin_file = str_replace("//wp_enqueue_script","wp_enqueue_script",$main_plugin_file);
+		$main_plugin_file = str_replace("//add_action('wp_enqueue_scripts','{$_POST['pluginception_oop_short_name']}');","add_action('wp_enqueue_scripts','{$_POST['pluginception_oop_short_name']}');",$main_plugin_file);
+		$main_plugin_file = str_replace("//Comment out if class loads scripts / styles)",'',$main_plugin_file);
+		$main_plugin_file = str_replace("add_action('init','{$_POST['pluginception_oop_short_name']}');",'',$main_plugin_file);
+		
 
 		if ( ! $wp_filesystem->put_contents( $jsfile, $js_file_header, FS_CHMOD_FILE) ) {
 			add_settings_error( 'pluginception_oop', 'create_file', 'Unable to create the plugin blank index file.', 'error' );
